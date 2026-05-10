@@ -2,18 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 
 export default function Home() {
 
   const trpc = useTRPC()
 
-  const {data} = useQuery(trpc.hello.queryOptions({text: "Hello!"}))
+ const invoke = useMutation(trpc.invoke.mutationOptions({}))
   return ( 
    <div className="flex-col items-center justify-center">
-    <h1 className="font-bold text-red-600">{JSON.stringify(data)}</h1>
-    <Button>Click Me</Button>
+    
+    <Button onClick={() => {invoke.mutate({id: 1, email:"priti@gmail.com"})}}>Click Me</Button>
     </div>
 
   );
