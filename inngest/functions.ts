@@ -11,7 +11,7 @@ import prisma from "@/lib/db";
 
 interface AgentState {
   summary: string;
-  files: { [path: string]: string},
+  files: { [path: string]: string },
 }
 
 export const codeAgentFunction = inngest.createFunction(
@@ -25,8 +25,8 @@ export const codeAgentFunction = inngest.createFunction(
       const sandbox = await Sandbox.create("civilstudent9900/nextjs-app")
       return sandbox.sandboxId
     })
-     
-  
+
+
     const codeAgent = createAgent<AgentState>({
       name: "code-agent",
       description: "An expert coding agent",
@@ -58,7 +58,24 @@ export const codeAgentFunction = inngest.createFunction(
                     buffers.stderr += data;
                   },
                 })
-                return result.stdout
+
+                if (result.exitCode !== 0) {
+                  throw new Error(`
+                          Command failed
+
+                          STDERR:
+                          ${buffers.stderr}
+
+                          STDOUT:
+                          ${buffers.stdout}
+                   `)
+                }
+                return {
+                  command,
+                  exitCode: result.exitCode,
+                  stdout: buffers.stdout,
+                  stderr: buffers.stderr
+                }
               } catch (e) {
                 console.error(
                   `Command failed: ${e} \nstdout: ${buffers.stdout}\nstderr: ${buffers.stderr}`
@@ -122,15 +139,15 @@ export const codeAgentFunction = inngest.createFunction(
         })
       ],
       lifecycle: {
-        onResponse: async ({result, network}) => {
-         const lastAssistentMessageText = lastAssistantTextMessageContent(result)
+        onResponse: async ({ result, network }) => {
+          const lastAssistentMessageText = lastAssistantTextMessageContent(result)
 
-         if(lastAssistentMessageText && network) {
-          if (lastAssistentMessageText.includes("<task_summary>")) {
-            network.state.data.summary = lastAssistentMessageText
+          if (lastAssistentMessageText && network) {
+            if (lastAssistentMessageText.includes("<task_summary>")) {
+              network.state.data.summary = lastAssistentMessageText
+            }
           }
-        }
-        return result
+          return result
         }
       }
     });
@@ -142,7 +159,7 @@ export const codeAgentFunction = inngest.createFunction(
       router: async ({ network }) => {
         const summary = network.state.data.summary
 
-           if(summary) {
+        if (summary) {
           return
         }
 
@@ -150,9 +167,9 @@ export const codeAgentFunction = inngest.createFunction(
       }
     })
 
-   const result = await network.run(event.data.value)
+    const result = await network.run(event.data.value)
 
-   const isError = !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0;
+    const isError = !result.state.data.summary || Object.keys(result.state.data.files || {}).length === 0;
 
 
     const sandboxUrl = await step.run("get-sandbox-url", async () => {
@@ -162,10 +179,11 @@ export const codeAgentFunction = inngest.createFunction(
       return `https://${host}`
     })
 
-    await step.run("save-result", async() => {
-      if(isError) {
+    await step.run("save-result", async () => {
+      if (isError) {
         return await prisma.message.create({
-          data : {
+          data: {
+            projectId: event.data.projectId,
             content: "Something went wrong, please try again",
             role: "ASSISTANT",
             type: "ERROR"
@@ -174,6 +192,7 @@ export const codeAgentFunction = inngest.createFunction(
       }
       return await prisma.message.create({
         data: {
+          projectId: event.data.projectId,
           content: result.state.data.summary,
           role: "ASSISTANT",
           type: "RESULT",
@@ -193,7 +212,7 @@ export const codeAgentFunction = inngest.createFunction(
       title: "Fragment",
       files: result.state.data.files,
       summary: result.state.data.summary
-     }
+    }
     // [{ role: 'assistant', content: 'function removeUnecessaryWhitespace(...' }]
 
   }

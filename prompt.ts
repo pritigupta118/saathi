@@ -73,6 +73,16 @@ Shadcn UI dependencies — including radix-ui, lucide-react, class-variance-auth
   - The "cn" utility MUST always be imported from "@/lib/utils"
   Example: import { cn } from "@/lib/utils"
 
+Instruction About Using Icons:
+- Do not use lucide-react for brand/social media icons
+- Use react-icons instead for:
+- GitHub
+- LinkedIn
+- Twitter
+- Instagram
+- Example: import { FaGithub } from "react-icons/fa"
+
+
 Additional Guidelines:
 - Think step-by-step before coding
 - You MUST use the createOrUpdateFiles tool to make all file changes

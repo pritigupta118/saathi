@@ -3,27 +3,32 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTRPC } from "@/trpc/client";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation"
 import { useState } from "react";
 import { toast } from "sonner";
 
 
 export default function Home() {
-
+  const router = useRouter()
   const trpc = useTRPC()
   const [value, setValue] = useState("")
   
-  const {data: messages} = useQuery(trpc.messages.getMany.queryOptions())
-  const createMessage = useMutation(trpc.messages.create.mutationOptions({
-    onSuccess: () => {
-      toast.success("Message created")
+  const createProject = useMutation(trpc.projects.create.mutationOptions({
+    onError: (error) =>{
+      toast.error(error.message)
+    },
+    onSuccess: (data) => {
+      router.push(`/projects/${data.id}`)
     }
   }))
+  
   return ( 
-   <div className="flex-col items-center justify-center">
+   <div className="h-screen w-screen flex justify-center items-center">
+    <div className="max-w-7xl flex items-center justify-center gap-y-4 mx-auto">
     <Input value={value} onChange={(e) => {setValue(e.target.value)}}/>
-    <Button disabled={createMessage.isPending} onClick={() => createMessage.mutate({ value: value})}>Click Me</Button>
-    {JSON.stringify(messages, null, 2)}
+    <Button disabled={createProject.isPending} onClick={() => createProject.mutate({ value: value})}>Submit</Button>
+    </div>
     </div>
 
   );
