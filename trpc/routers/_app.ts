@@ -1,9 +1,9 @@
 import { projectRouter } from '@/modules/projects/server/procedures';
 import { createTRPCRouter } from '../init';
-import { massageRouter } from '@/modules/messages/server/procedures';
+import { messageRouter } from '@/modules/messages/server/procedures';
  
 export const appRouter = createTRPCRouter({
-  messages: massageRouter,
+  messages: messageRouter,
   projects: projectRouter
 })
  
