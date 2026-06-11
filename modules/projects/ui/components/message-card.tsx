@@ -78,13 +78,13 @@ return (
       type === "ERROR" && "text-red-700 dark:text-red-500",
     )}>
         <div className="flex item-center gap-2 pl-2 mb-2">
-              {/* <Image
-          src="/logo.svg"
+              <Image
+          src="/logo.png"
           alt="Vibe"
           width={18}
           height={18}
           className="shrink-0"
-        /> */}
+        />
         <span className="text-sm font-medium">Saathi</span>
         <span className="text-xs text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100">
           {format(createdAt, "HH:mm 'on' MMM dd, yyyy")}
