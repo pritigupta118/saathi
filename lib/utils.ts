@@ -1,7 +1,8 @@
-import { TreeItem } from "@/types"
 import { clsx, type ClassValue } from "clsx"
-import { Span } from "next/dist/trace"
 import { twMerge } from "tailwind-merge"
+
+import { TreeItem } from "@/types"
+
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
